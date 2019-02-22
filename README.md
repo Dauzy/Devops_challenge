@@ -52,3 +52,5 @@ To create infrastructure we need the following the next steps:
   ...
   $ terraform apply
   ```
+
+Now, we can use the DNS name of our load balancer to visit web app and see the results.

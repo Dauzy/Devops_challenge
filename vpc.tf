@@ -66,15 +66,6 @@ resource "aws_security_group" "sgweb" {
   name = "vpc_test_web"
   description = "Allow incoming HTTP connections & SSH access"
 
-
-  ingress {
-    from_port = -1
-    to_port = -1
-    protocol = "icmp"
-    #security_groups =["$aws_security_group.sg_alb_web.name"]
-    cidr_blocks = ["${var.public_subnet_cidr}"]
-  }
-
   ingress {
     from_port = 22
     to_port = 22
