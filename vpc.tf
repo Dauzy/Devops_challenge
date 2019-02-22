@@ -1,3 +1,5 @@
+# Define VPC
+
 resource "aws_vpc" "default" {
     cidr_block = "${var.vpc_cidr}"
     enable_dns_hostnames = true
@@ -7,6 +9,7 @@ resource "aws_vpc" "default" {
     }
 }
 
+# Define the public subnet
 resource "aws_subnet" "public-subnet" {
     vpc_id = "${aws_vpc.default.id}"
     cidr_block = "${var.public_subnet_cidr}"
@@ -17,6 +20,7 @@ resource "aws_subnet" "public-subnet" {
     }
 }
 
+# Define the private subnet
 resource "aws_subnet" "private-subnet" {
     vpc_id = "${aws_vpc.default.id}"
     cidr_block = "${var.private_subnet_cidr}"
@@ -27,6 +31,7 @@ resource "aws_subnet" "private-subnet" {
     }
 }
 
+# Define the internet gateway
 resource "aws_internet_gateway" "gw" {
     vpc_id = "${aws_vpc.default.id}"
 
@@ -56,7 +61,7 @@ resource "aws_route_table_association" "web-public-rt" {
   route_table_id = "${aws_route_table.web-public-rt.id}"
 }
 
-# Define the security group for public subnet
+# Define the security group for Web servers
 resource "aws_security_group" "sgweb" {
   name = "vpc_test_web"
   description = "Allow incoming HTTP connections & SSH access"
@@ -110,6 +115,7 @@ resource "aws_security_group_rule" "ingress-http" {
   security_group_id = "${aws_security_group.sgweb.id}"
 }
 
+# Define the security group for ALB
 resource "aws_security_group" "sg_alb_web" {
   name = "sg_alb_web"
   description = "Allow incoming HTTP connections"
@@ -149,40 +155,7 @@ resource "aws_security_group" "sg_alb_web" {
   }
 }
 
-
-# Define the security group for private subnet
-#resource "aws_security_group" "sgdb"{
-#  name = "sg_test_web"
-#  description = "Allow traffic from public subnet"
-
-#  ingress {
-#    from_port = 3306
-#    to_port = 3306
-#    protocol = "tcp"
-#    cidr_blocks = ["${var.public_subnet_cidr}"]
-#  }
-
-#  ingress {
-#    from_port = -1
-#    to_port = -1
-#    protocol = "icmp"
-#    cidr_blocks = ["${var.public_subnet_cidr}"]
-#  }
-
-#  ingress {
-#    from_port = 22
-#    to_port = 22
-#    protocol = "tcp"
-#    cidr_blocks = ["${var.public_subnet_cidr}"]
-#  }
-
-#  vpc_id = "${aws_vpc.default.id}"
-
-#  tags {
-#    Name = "DB SG"
-#  }
-#}
-
+# Define ALB
 resource "aws_alb" "alb_webserver" {
   subnets         = ["${aws_subnet.public-subnet.id}","${aws_subnet.private-subnet.id}"]
   security_groups = ["${aws_security_group.sg_alb_web.id}"]
@@ -193,6 +166,7 @@ resource "aws_alb" "alb_webserver" {
 
 }
 
+# Define Target Group
 resource "aws_alb_target_group" "targetg_alb_webserver" {
 
 	vpc_id	= "${aws_vpc.default.id}"
@@ -211,6 +185,7 @@ resource "aws_alb_target_group" "targetg_alb_webserver" {
         }
 }
 
+# Attach target group to web server
 resource "aws_alb_target_group_attachment" "alb_webserver-01" {
   target_group_arn = "${aws_alb_target_group.targetg_alb_webserver.arn}"
   target_id        = "${aws_instance.wb.id}"
@@ -222,6 +197,7 @@ resource "aws_alb_target_group_attachment" "alb_webserver-02" {
   port             = 80
 }
 
+# Config alb listener
 resource "aws_alb_listener" "alb_listener" {
     load_balancer_arn = "${aws_alb.alb_webserver.arn}"
     port = "80"

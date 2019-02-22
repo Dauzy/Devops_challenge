@@ -1,6 +1,6 @@
 # DevOps Coding Challenge
 
-We need to build a create a Web Server Infrastructure. The infrastructure must have a vpc, two subnets, one prublic subnet and the other private subnet, a load balancer which is publicly available on the internet and the internet gateway.
+We need to create a Web Server Infrastructure. The infrastructure must have a vpc, two subnets, one prublic subnet and the other private subnet, a load balancer which is publicly available on the internet and the internet gateway.
 
 ![Alt text](images/infra.png?raw=true "Title")
 
